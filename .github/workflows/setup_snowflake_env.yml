@@ -29,4 +29,4 @@ jobs:
       - name: Execute Snowflake Setup Script
         run: |
           echo "Executing Snowflake Setup Script"
-          ~/bin/snowsql -f scripts/setup_snowflake_env.sql -o friendly=fals
+          ~/bin/snowsql -f scripts/setup_snowflake_env.sql -o friendly=false
