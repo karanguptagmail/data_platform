@@ -1,0 +1,116 @@
+name: DBT CI/CD
+
+on:
+  schedule:
+   - cron: '*/5 * * * *' # Runs every 5 minutes
+  push:
+    branches:
+      - main
+  workflow_dispatch: # To allow for manual trigger
+
+jobs:
+  dbt_ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install DBT and Snowflake adapter
+        run: |
+          pip install dbt-core dbt-snowflake
+      - name: Set up dbt profile
+        run: |
+          mkdir -p ~/.dbt
+          echo "
+          demo_snowflake_dbt:
+            outputs:
+              dev:
+                account: $SNOWFLAKE_ACCOUNT
+                database: $SNOWFLAKE_DATABASE
+                password: $SNOWFLAKE_PASSWORD
+                role: $SNOWFLAKE_ROLE
+                schema: $SNOWFLAKE_SCHEMA
+                threads: 4
+                type: snowflake
+                user: $SNOWFLAKE_USER
+                warehouse: $SNOWFLAKE_WAREHOUSE
+            target: dev
+          " > ~/.dbt/profiles.yml
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USERNAME }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+
+      - name: DBT debug
+        run: dbt debug
+
+      - name: DBT deps
+        run: dbt deps
+
+      - name: DBT test
+        run: dbt test
+
+  dbt_cd:
+    runs-on: ubuntu-latest
+    needs: dbt_ci
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install DBT and Snowflake adapter
+        run: |
+          pip install dbt-core dbt-snowflake
+      - name: Set up dbt profile
+        run: |
+          mkdir -p ~/.dbt
+          echo "
+          demo_snowflake_dbt:
+            outputs:
+              dev:
+                account: $SNOWFLAKE_ACCOUNT
+                database: $SNOWFLAKE_DATABASE
+                password: $SNOWFLAKE_PASSWORD
+                role: $SNOWFLAKE_ROLE
+                schema: $SNOWFLAKE_SCHEMA
+                threads: 16
+                type: snowflake
+                user: $SNOWFLAKE_USER
+                warehouse: $SNOWFLAKE_WAREHOUSE
+            target: dev
+          " > ~/.dbt/profiles.yml
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USERNAME }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+
+      - name: DBT deps
+        run: dbt deps
+
+      - name: DBT run staging
+        run: dbt run -s tag:staging
+
+      - name: dbt run intermediate
+        run: dbt run -s tag:intermediate
+
+      - name: dbt run marts
+        run: dbt run -s tag:marts
