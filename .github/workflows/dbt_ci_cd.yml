@@ -25,6 +25,13 @@ jobs:
         run: |
           pip install dbt-core dbt-snowflake
 
+      - name: Debug GitHub Secrets
+        run: |
+          echo "SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}"
+          echo "SNOWFLAKE_USERNAME: ${{ secrets.SNOWFLAKE_USERNAME }}"
+          echo "SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}"
+
+
       - name: Set up dbt profile
         run: |
           mkdir -p ~/.dbt
