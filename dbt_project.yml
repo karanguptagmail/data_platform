@@ -33,9 +33,21 @@ clean-targets:         # directories to be removed by `dbt clean`
 # using the `{{ config(...) }}` macro.
 models:
   dbt_project:
-    +materialized: view
+    # +materialized: view
     dim:
       +materialized: table
     source_layer_src:
       +materialized: ephemeral
     materialized: custom_materialized
+    staging:
+      materialized: view
+      snowflake_warehouse: dbt_wh
+      +tags: ['staging']
+    intermediate:
+      materialized: view
+      snowflake_warehouse: dbt_wh
+      +tags: ['intermediate']
+    marts:
+      materialized: table
+      snowflake_warehouse: dbt_wh
+      +tags: ['marts']
