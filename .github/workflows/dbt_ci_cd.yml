@@ -51,6 +51,8 @@ jobs:
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
           SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
 
+        run: cd ~/.dbt/profiles.yml
+        
       - name: DBT debug
         run: dbt debug
 
