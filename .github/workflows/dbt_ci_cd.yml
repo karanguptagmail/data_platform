@@ -1,4 +1,4 @@
-name: DBT CI/CD
+name: DBT CI/CD UPLOAD_TO_S3
 
 on:
   schedule:
@@ -107,7 +107,7 @@ jobs:
 
   upload_to_s3:
     runs-on: ubuntu-latest
-    needs: dbt_ci
+    needs: dbt_di
     
     steps:
       - name: Checkout repository
