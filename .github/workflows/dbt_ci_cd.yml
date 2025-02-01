@@ -31,28 +31,17 @@ jobs:
           jaffle_shop:
             outputs:
               dev:
-                account: $SNOWFLAKE_ACCOUNT
-                database: $SNOWFLAKE_DATABASE
-                password: $SNOWFLAKE_PASSWORD
-                role: $SNOWFLAKE_ROLE
-                schema: $SNOWFLAKE_SCHEMA
+                account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+                user: ${{ secrets.SNOWFLAKE_USERNAME }}
+                password: ${{ secrets.SNOWFLAKE_PASSWORD }}
+                database: ${{ secrets.SNOWFLAKE_DATABASE }}
+                schema: ${{ secrets.SNOWFLAKE_SCHEMA }}
+                role: ${{ secrets.SNOWFLAKE_ROLE }}
+                warehouse: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
                 threads: 4
                 type: snowflake
-                user: $SNOWFLAKE_USER
-                warehouse: $SNOWFLAKE_WAREHOUSE
             target: dev
           " > ~/.dbt/profiles.yml
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USERNAME }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
-          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
-          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
-          SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
-
-      - name: cat profiles.yml
-        run: cd ~/.dbt/profiles.yml
         
       - name: DBT debug
         run: dbt debug
