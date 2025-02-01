@@ -107,7 +107,7 @@ jobs:
 
   upload_to_s3:
     runs-on: ubuntu-latest
-    needs: dbt_di
+    needs: dbt_cd
     
     steps:
       - name: Checkout repository
