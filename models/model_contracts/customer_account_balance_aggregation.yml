@@ -1,0 +1,11 @@
+models:
+  - name: customer_account_balance
+    config:
+      materialized: table
+      contract:
+        enforced: true
+    columns:
+      - name: CUSTOMER_ID
+        data_type: int
+      - name: INTEREST_EARNED
+        data_type: float

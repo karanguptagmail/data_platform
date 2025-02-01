@@ -1,0 +1,21 @@
+models:
+  - name: customer_prod_pii
+    config:
+      materialized: table
+      contract:
+        enforced: true
+    columns:
+      - name: CUSTOMERID
+        data_type: int
+      - name: CUSTOMERNAME
+        data_type: varchar
+      - name: CONTACTNUMBER
+        data_type: varchar
+      - name: EMAIL
+        data_type: varchar
+      - name: ADDRESS
+        data_type: varchar
+      - name: CUSTOMER_REGION
+        data_type: varchar
+      - name: rn
+        data_type: numeric
