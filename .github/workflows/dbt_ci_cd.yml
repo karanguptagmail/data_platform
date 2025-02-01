@@ -118,6 +118,7 @@ jobs:
         with:
           aws_key_id: ${{ secrets.AWS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region: us-east-1
 
       - name: Upload files to S3 (Private)
         run: |
