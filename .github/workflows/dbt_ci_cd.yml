@@ -2,7 +2,7 @@ name: DBT CI/CD
 
 on:
   schedule:
-   - cron: '*/5 * * * *' # Runs every 5 minutes
+   - cron: '0 0 * * *' # Runs every 5 minutes
   push:
     branches:
       - main
@@ -24,38 +24,41 @@ jobs:
       - name: Install DBT and Snowflake adapter
         run: |
           pip install dbt-core dbt-snowflake
+
+      - name: Debug GitHub Secrets
+        run: |
+          echo "SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}"
+          echo "SNOWFLAKE_USERNAME: ${{ secrets.SNOWFLAKE_USERNAME }}"
+          echo "SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}"
+
+
       - name: Set up dbt profile
         run: |
           mkdir -p ~/.dbt
-          echo "
-          demo_snowflake_dbt:
+          cat <<EOF > ~/.dbt/profiles.yml
+          jaffle_shop:
             outputs:
               dev:
-                account: $SNOWFLAKE_ACCOUNT
-                database: $SNOWFLAKE_DATABASE
-                password: $SNOWFLAKE_PASSWORD
-                role: $SNOWFLAKE_ROLE
-                schema: $SNOWFLAKE_SCHEMA
+                account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+                user: ${{ secrets.SNOWFLAKE_USERNAME }}
+                password: ${{ secrets.SNOWFLAKE_PASSWORD }}
+                database: ${{ secrets.SNOWFLAKE_DATABASE }}
+                schema: ${{ secrets.SNOWFLAKE_SCHEMA }}
+                role: ${{ secrets.SNOWFLAKE_ROLE }}
+                warehouse: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
                 threads: 4
                 type: snowflake
-                user: $SNOWFLAKE_USER
-                warehouse: $SNOWFLAKE_WAREHOUSE
             target: dev
-          " > ~/.dbt/profiles.yml
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USERNAME }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
-          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
-          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
-          SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+          EOF
 
       - name: DBT debug
         run: dbt debug
 
       - name: DBT deps
         run: dbt deps
+
+      - name: DBT compile  # Optional but recommended
+        run: dbt compile
 
       - name: DBT test
         run: dbt test
@@ -76,32 +79,25 @@ jobs:
       - name: Install DBT and Snowflake adapter
         run: |
           pip install dbt-core dbt-snowflake
+
       - name: Set up dbt profile
         run: |
           mkdir -p ~/.dbt
-          echo "
+          cat <<EOF > ~/.dbt/profiles.yml
           demo_snowflake_dbt:
             outputs:
               dev:
-                account: $SNOWFLAKE_ACCOUNT
-                database: $SNOWFLAKE_DATABASE
-                password: $SNOWFLAKE_PASSWORD
-                role: $SNOWFLAKE_ROLE
-                schema: $SNOWFLAKE_SCHEMA
-                threads: 16
+                account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+                user: ${{ secrets.SNOWFLAKE_USERNAME }}
+                password: ${{ secrets.SNOWFLAKE_PASSWORD }}
+                database: ${{ secrets.SNOWFLAKE_DATABASE }}
+                schema: ${{ secrets.SNOWFLAKE_SCHEMA }}
+                role: ${{ secrets.SNOWFLAKE_ROLE }}
+                warehouse: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+                threads: 4  # Changed from 16 to match CI
                 type: snowflake
-                user: $SNOWFLAKE_USER
-                warehouse: $SNOWFLAKE_WAREHOUSE
             target: dev
-          " > ~/.dbt/profiles.yml
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USERNAME }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
-          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
-          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
-          SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+          EOF
 
       - name: DBT deps
         run: dbt deps
@@ -109,8 +105,8 @@ jobs:
       - name: DBT run staging
         run: dbt run -s tag:staging
 
-      - name: dbt run intermediate
+      - name: DBT run intermediate
         run: dbt run -s tag:intermediate
 
-      - name: dbt run marts
+      - name: DBT run marts
         run: dbt run -s tag:marts
