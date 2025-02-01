@@ -78,7 +78,7 @@ jobs:
         run: |
           mkdir -p ~/.dbt
           cat <<EOF > ~/.dbt/profiles.yml
-          demo_snowflake_dbt:
+          jaffle_shop:
             outputs:
               dev:
                 account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
