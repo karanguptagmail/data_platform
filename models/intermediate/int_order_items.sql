@@ -6,8 +6,7 @@ line_item.line_number,
 line_item.extended_price,
 orders.order_key,
 orders.customer_key,
-orders.order_date,
-{{ discounted_amount('line_item.extended_price', 'line_item.discount_percentage') }} as item_discount_amount
+orders.order_date
 from {{ ref('stg_tpch_orders') }} as orders
 join
 {{ ref('stg_tpch_line_items') }} as line_item
