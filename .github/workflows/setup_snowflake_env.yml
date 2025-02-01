@@ -1,0 +1,32 @@
+name: Workflow to Setup Snowflake Environment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/setup_snowflake_env.yml'
+  workflow_dispatch: # To allow for manual trigger
+
+jobs:
+  setup_snowflake:
+    runs-on: ubuntu-latest
+
+    env: # only these are needed for this first workflow
+      SNOWSQL_PWD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+      SNOWSQL_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWSQL_USER: ${{ secrets.SNOWFLAKE_USERNAME }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install SnowSQL
+        run: |
+          curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.9-linux_x86_64.bash
+          SNOWSQL_DEST=~/bin SNOWSQL_LOGIN_SHELL=~/.profile bash snowsql-1.2.9-linux_x86_64.bash
+
+      - name: Execute Snowflake Setup Script
+        run: |
+          echo "Executing Snowflake Setup Script"
+          ~/bin/snowsql -f scripts/setup_snowflake_env.sql -o friendly=fals
