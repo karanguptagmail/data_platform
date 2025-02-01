@@ -104,3 +104,21 @@ jobs:
 
       - name: DBT run marts
         run: dbt run -s tag:marts
+
+  upload_to_s3:
+    runs-on: ubuntu-latest
+    needs: dbt_ci
+    
+    steps:
+      - name: Checkout repository
+      - uses: actions/checkout@master
+      
+      - name: Configure AWS credentials
+      - uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws_key_id: ${{ secrets.AWS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+
+      - name: Upload files to S3 (Private)
+        run: |
+          aws s3 sync . s3://dbt-project --exclude ".git/*"
